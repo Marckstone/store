@@ -3,6 +3,7 @@ package petstore;
 
 // 2 - Bibliotecas
 
+import org.hamcrest.Matcher;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -10,6 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static io.restassured.RestAssured.given;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.contains;
 
 // 3 - Classe
 public class Pet {
@@ -23,7 +27,7 @@ public class Pet {
 
 
     // incluir - Create - Post
-    @Test  // Identifica o método ou função como um teste para o TestNG
+    @Test(priority= 1) // Identifica o método ou função como um teste para o TestNG
     public void incluirPet() throws IOException {
         String jsonBody = lerJson("db/pet1.json");
 
@@ -36,14 +40,58 @@ public class Pet {
                 .contentType("application/json") // comum em API REST - antigas era "text/xml"
                 .log().all()
                 .body(jsonBody)
-        .when()
+                .when()
                 .post(uri)
-        .then()
+                .then()
                 .log().all()
                 .statusCode(200)
+                .body("name", is("Sonic"))
+                .body("status", is("available"))
+                .body("category.name", is("dog"))
+                .body("tags.name", contains("sta"))
         ;
 
 
     }
+
+    @Test(priority = 2)
+    public void consultarPet() {
+        String petId = "1990051909";
+
+        given()
+                .contentType("application/json")
+                .log().all()
+        .when()
+                .get(uri + "/" + petId)
+        .then()
+                .log() .all()
+                .statusCode(200)
+                .body("name", is("Sonic"))
+                .body("status", is("available"))
+                .body("category.name", is("dog"))
+                .body("tags.name", contains("sta"))
+        ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
 }
 
